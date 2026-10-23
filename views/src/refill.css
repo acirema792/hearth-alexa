@@ -1,0 +1,14 @@
+.refill { padding: clamp(18px, 3vw, 40px); display: grid; gap: clamp(12px, 2vw, 22px); max-width: 980px; }
+.refill h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4.4vw, 54px); line-height: 1.08; }
+.why { color: var(--rose); font-weight: 600; }
+.refill dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 26px; margin: 0; background: var(--panel); padding: clamp(14px, 2vw, 24px); border-radius: var(--radius-l); }
+.refill dt { color: var(--ink-dim); }
+.refill dd { margin: 0; font-weight: 600; }
+.actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.go { min-height: 72px; padding: 0 34px; border-radius: 999px; border: 0; background: var(--marigold); color: #241a05; font-weight: 750; font-size: clamp(20px, 2.8vw, 32px); }
+.later { min-height: 72px; padding: 0 28px; border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--ink); font-size: clamp(18px, 2.4vw, 28px); }
+.go:disabled { opacity: 0.6; }
+.left { color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.err { color: var(--rose); }
+.ordered .stamp { width: 84px; height: 84px; border-radius: 50%; background: var(--sage); color: var(--night); display: grid; place-items: center; font-size: 48px; font-weight: 800; }
+.sandbox { color: var(--ink-dim); font-size: 0.8em; }
