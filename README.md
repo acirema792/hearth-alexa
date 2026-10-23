@@ -7,6 +7,21 @@
 
 ![Hearth on a simulated Echo Show, with Daniel's phone and the protocol inspector](docs/hearth-showbench.png)
 
+### For judges: test it in 3 minutes
+
+```bash
+git clone https://github.com/acirema792/hearth-alexa && cd hearth-alexa && npm install
+npm test            # 9 end-to-end tests over real Streamable HTTP (~5 s)
+npm start           # MCP server → http://127.0.0.1:8787/mcp
+# in a second terminal, from the same folder:
+npx github:acirema792/showbench --server http://localhost:8787/mcp --intents showbench.intents.json \
+  --skill skills/hearth-care-circle/SKILL.md --companion http://localhost:8787/companion
+# open http://localhost:5173 and click the suggestion chips, then:
+curl -X POST localhost:8787/demo/clock -H 'content-type: application/json' -d '{"set":"19:35"}'   # the Echo speaks up on its own
+```
+
+No API keys, accounts or hardware needed. Node 20+ only.
+
 ## Why
 
 - In 2025 Amazon retired **Alexa Together**, its paid remote-caregiving service ([Amazon](https://www.aboutamazon.com/news/devices/alexa-together-is-helping-bridge-the-miles-between-families)). The need didn't go away.
