@@ -1,0 +1,88 @@
+{
+  "$comment": "Offline intent rules for running Hearth in ShowBench without an LLM key. With ANTHROPIC_API_KEY or OPENAI_API_KEY set, ShowBench uses a real LLM planner plus Hearth's server instructions and Agent Skill instead.",
+  "suggestions": [
+    "what's on today?",
+    "I took my morning pills",
+    "let's do my check-in",
+    "order more metformin",
+    "tell Daniel the roses are blooming",
+    "how's Mom doing this week?"
+  ],
+  "speechStrip": [
+    "\\(quote token:[^)]*\\)"
+  ],
+  "fallback": "I can help with your pills, your check-in, refills and messages to family.",
+  "intents": [
+    {
+      "match": "^(yes|yeah|yep|sure|please do|order it|go ahead|do it)\\b",
+      "requires": "last.quote_refill.quote.token",
+      "tool": "confirm_refill",
+      "args": {
+        "token": "{{last.quote_refill.quote.token}}",
+        "confirmedBy": "rosa"
+      },
+      "forget": [
+        "quote_refill"
+      ]
+    },
+    {
+      "match": "^(no|not now|maybe later)\\b",
+      "requires": "last.quote_refill.quote.token",
+      "calls": [],
+      "say": "Okay, not now. I'll remind you while there's still time.",
+      "forget": [
+        "quote_refill"
+      ]
+    },
+    {
+      "match": "(did i take|what'?s next|what'?s on|my day|today)",
+      "tool": "show_today"
+    },
+    {
+      "match": "\\b(skip|skipping|skipped|didn'?t take)\\b",
+      "tool": "log_medication",
+      "args": {
+        "medication": "{{utterance}}",
+        "status": "skipped"
+      }
+    },
+    {
+      "match": "\\b(took|taken|had|finished|i'?ve taken)\\b",
+      "tool": "log_medication",
+      "args": {
+        "medication": "{{utterance}}"
+      }
+    },
+    {
+      "match": "check[- ]?in|how i'?m feeling",
+      "tool": "start_check_in"
+    },
+    {
+      "match": "refill|running (low|out)|order (more|some)|reorder",
+      "tool": "quote_refill",
+      "args": {
+        "medication": "{{utterance}}"
+      }
+    },
+    {
+      "match": "^(?:tell|message|text|let) (\\w+)(?: know)?(?: that)? (.+)$",
+      "tool": "send_family_message",
+      "args": {
+        "to": "{{1}}",
+        "text": "{{2}}"
+      }
+    },
+    {
+      "match": "messages|did anyone (write|call)|any news",
+      "tool": "read_family_messages"
+    },
+    {
+      "match": "how'?s mom|how is mom|this week|dashboard|briefing",
+      "tool": "show_family_dashboard"
+    },
+    {
+      "match": "care rounds|check on everything",
+      "tool": "run_care_rounds"
+    }
+  ]
+}
