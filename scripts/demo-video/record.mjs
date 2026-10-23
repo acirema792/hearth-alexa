@@ -154,7 +154,7 @@ t0 = Date.now();
 await card(`<h1>Hearth</h1><div class="sub">A care circle for Alexa+</div>
   <div class="facts">
     <div class="fact"><b>2025</b>Amazon retired Alexa Together, its remote-caregiving service</div>
-    <div class="fact"><b>63 million</b>Americans are family caregivers (AARP &amp; NAC, 2025)</div>
+    <div class="fact"><b>63 million</b>Americans are family caregivers (2025 national survey)</div>
     <div class="fact"><b>MCP + MCP Apps</b>Self-hosted server, spec 2025-11-25, Streamable HTTP</div>
   </div>
   <div class="note">Demo runs on a simulated Alexa+ Echo Show (ShowBench, open source). Demo clock and sandbox pharmacy.</div>`);
