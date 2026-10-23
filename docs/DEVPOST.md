@@ -9,7 +9,7 @@ Aging parents manage meds & check-ins by voice on Echo Show; their family gets s
 
 **Video:** VIDEO_URL
 
-**Code:** https://github.com/GITHUB_USER/hearth-alexa (MIT) · Open-source contribution: https://github.com/GITHUB_USER/showbench (MIT)
+**Code:** https://github.com/acirema792/hearth-alexa (MIT) · Open-source contribution: https://github.com/acirema792/showbench (MIT)
 
 **Built with:** typescript, node.js, model-context-protocol, mcp-apps, streamable-http, agent-skills, server-sent-events, esbuild, web-speech-api
 
@@ -103,9 +103,9 @@ Hearth is a self-hosted **MCP server** that Alexa+ (or any MCP-Apps host) talks 
 No. Hearth and ShowBench were both created during the submission window (October 2026). See the commit history.
 
 ## Open Source mini challenge fields
-- **Contribution URL:** https://github.com/GITHUB_USER/showbench
-- **Project repository URL:** https://github.com/GITHUB_USER/hearth-alexa
-- **GitHub username:** GITHUB_USER
+- **Contribution URL:** https://github.com/acirema792/showbench
+- **Project repository URL:** https://github.com/acirema792/hearth-alexa
+- **GitHub username:** acirema792
 - **What we did, how it works, why it matters:** ShowBench is a new open-source (MIT) voice and smart-display host for testing MCP servers and MCP Apps the way they'll run on Alexa+ class devices.
   - **How it works:**
     - It connects to any MCP server over Streamable HTTP (spec 2025-11-25).
