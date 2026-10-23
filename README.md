@@ -13,6 +13,8 @@
 - **63 million Americans** are family caregivers, up 45% in a decade ([AARP & NAC, *Caregiving in the US 2025*](https://www.aarp.org/caregiving/basics/caregiving-in-us-survey-2025/)). Many care from another city.
 - **Half of the 3.2 billion US prescriptions are not taken as prescribed**, at an estimated **$100–300 billion a year**, and poor adherence drives 33–69% of medication-related hospital admissions ([Bosworth et al., *American Heart Journal*, 2011](https://pmc.ncbi.nlm.nih.gov/articles/PMC3947508/)).
 
+- **Someone already pays for adherence.** Medicare Part D Star Ratings score plans on adherence to exactly Rosa's three drug classes: diabetes medications, RAS antagonists (lisinopril) and statins. Each measure is triple-weighted ([AJMC](https://ajmc.com/view/contributor-medication-adherence-is-a-force-multiplier-for-medicare-advantage-profitability-enrollment-star-ratings)). That gives Hearth a credible route to market: **free for families, sponsored by Medicare Advantage plans and pharmacies**, which could also ship it as their own branded Alexa+ experience.
+
 The Echo Show is already in the kitchens of the people who need this most. Alexa+ can finally hold a real conversation. Hearth is the care brain behind it.
 
 ## What it does
