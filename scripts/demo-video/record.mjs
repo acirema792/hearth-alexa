@@ -10,7 +10,8 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 
 const DRY = process.argv[2] === "dry";
-const OUT = "/home/claude/work/video";
+const here = new URL(".", import.meta.url).pathname;
+const OUT = process.env.VIDEO_OUT ?? `${here}out`;
 const CACHE = `${OUT}/tts`;
 mkdirSync(CACHE, { recursive: true });
 const VOICES = { narrator: "af_heart", alexa: "af_bella", rosa: "bf_emma", daniel: "am_michael" };
@@ -18,7 +19,7 @@ const SPEED = { narrator: 1.0, alexa: 1.05, rosa: 0.95, daniel: 1.0 };
 const REPO = process.env.REPO_URL ?? "github.com/hearth-alexa";
 
 // ------------------------------------------------------------------ TTS worker
-const tts = spawn("python3", ["/home/claude/work/tts/tts_server.py"], { stdio: ["pipe", "pipe", "inherit"] });
+const tts = spawn("python3", [process.env.TTS_SERVER ?? `${here}tts_server.py`], { stdio: ["pipe", "pipe", "inherit"] });
 const lines = createInterface({ input: tts.stdout });
 const waiting = [];
 lines.on("line", (l) => {
