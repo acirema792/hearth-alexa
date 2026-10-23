@@ -3,7 +3,7 @@
 **Hearth lets an older adult manage her medications and daily check-ins by voice on an Echo Show, and keeps her family in the loop from wherever they live.** It is a self-hosted **MCP server** (spec **2025-11-25**, **Streamable HTTP**) with **MCP Apps** visual cards, **proactive announcements** over resource subscriptions, a **purchase flow** with explicit confirmation, and an **Agent Skill** that carries the care rules.
 
 > Built for the *Build, Ship, Shape: Amazon Developer Hackathon* (Alexa+ track, Open Source mini challenge).
-> Demo video: **VIDEO_URL** · Simulator: [ShowBench](https://github.com/GITHUB_USER/showbench) (open source, built alongside Hearth)
+> Demo video: **VIDEO_URL** · Simulator: [ShowBench](https://github.com/acirema792/showbench) (open source, built alongside Hearth)
 
 ![Hearth on a simulated Echo Show, with Daniel's phone and the protocol inspector](docs/hearth-showbench.png)
 
@@ -76,7 +76,7 @@ flowchart LR
 Requires Node 20+.
 
 ```bash
-git clone https://github.com/GITHUB_USER/hearth-alexa && cd hearth-alexa
+git clone https://github.com/acirema792/hearth-alexa && cd hearth-alexa
 npm install
 npm start                      # MCP server on http://127.0.0.1:8787/mcp + family app on /companion
 ```
@@ -84,7 +84,7 @@ npm start                      # MCP server on http://127.0.0.1:8787/mcp + famil
 Then open the device simulator in another terminal:
 
 ```bash
-npx github:GITHUB_USER/showbench \
+npx github:acirema792/showbench \
   --server http://localhost:8787/mcp \
   --intents showbench.intents.json \
   --skill skills/hearth-care-circle/SKILL.md \
