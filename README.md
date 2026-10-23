@@ -30,6 +30,8 @@ The Echo Show is already in the kitchens of the people who need this most. Alexa
 - A **family dashboard** (MCP App): 7-day adherence grid, mood/sleep/pain trend, refills to confirm, and a note box that speaks on Mom's Echo.
 - *"Alexa, how's Mom doing this week?"* gives a spoken summary.
 
+![Family dashboard MCP App on Daniel's Echo Show](docs/family-dashboard.png)
+
 **On its own (the care loop)**
 `run_care_rounds` runs every 15 minutes, like an Alexa+ routine. It checks every dose and the daily check-in against the ladder, forecasts refills (quotes one when supply drops under 5 days), and is **idempotent**: every step has a dedupe key, so nobody gets texted twice.
 
@@ -89,7 +91,7 @@ npx github:GITHUB_USER/showbench \
 # open http://localhost:5173
 ```
 
-ShowBench runs offline with Hearth's intent rules out of the box. For a real LLM planner, set `ANTHROPIC_API_KEY`, or `OPENAI_API_KEY` (+ `OPENAI_BASE_URL` for Gemini, Groq, OpenRouter or Ollama). The planner then uses Hearth's server instructions and Agent Skill.
+ShowBench runs offline with Hearth's intent rules out of the box. The demo video uses this deterministic planner so it is exactly reproducible. For a real LLM planner, set `ANTHROPIC_API_KEY`, or `OPENAI_API_KEY` (+ `OPENAI_BASE_URL` for Gemini, Groq, OpenRouter or Ollama). The planner then uses Hearth's server instructions and Agent Skill.
 
 **Try:** "what's on today?", "I took my morning pills", "let's do my check-in", "did I take my metformin?", "order more metformin" → "yes", "tell Daniel the roses are blooming".
 
@@ -100,6 +102,8 @@ curl -X POST localhost:8787/demo/clock -H 'content-type: application/json' -d '{
 curl -X POST localhost:8787/demo/clock -H 'content-type: application/json' -d '{"set":"20:05"}'   # Daniel's phone buzzes
 curl -X POST localhost:8787/demo/reset -H 'content-type: application/json' -d '{"set":"08:20"}'   # fresh morning
 ```
+
+**Docker (self-hosting).** `docker build -t hearth . && docker run -p 8787:8787 -v hearth-data:/app/data hearth`
 
 **Other MCP hosts.** Any MCP-Apps-capable host can use Hearth: Claude, VS Code, Goose, MCPJam and others. Point it at `http://<host>:8787/mcp`. For a remote host, expose it with a tunnel (for example `cloudflared tunnel --url http://localhost:8787`) and set `HOST=0.0.0.0` and `HEARTH_ALLOWED_ORIGINS`.
 
