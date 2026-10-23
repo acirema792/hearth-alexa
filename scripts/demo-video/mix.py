@@ -1,7 +1,7 @@
 """Assemble the demo video: timestamped JPEG frames + voice clips placed at logged times -> MP4."""
 import json, os, subprocess, sys
 
-V = "/home/claude/work/video"
+V = os.environ.get("VIDEO_OUT", os.path.join(os.path.dirname(os.path.abspath(__file__)), "out"))
 frames = json.load(open(f"{V}/frames.json"))
 ev = json.load(open(f"{V}/events.json"))
 total = ev["total"] / 1000

@@ -8,4 +8,4 @@ pip install kokoro-onnx soundfile               # + kokoro-v1.0.onnx and voices-
 node record.mjs dry && node record.mjs && python3 mix.py
 ```
 
-Paths at the top of each script assume the layout used during the hackathon; adjust `OUT` and the TTS worker path for your machine. Hearth and ShowBench must be running (Hearth with `HEARTH_ROUNDS_INTERVAL_SEC=0` so only the demo clock triggers the care loop).
+Output goes to `./out` (override with `VIDEO_OUT`); the TTS worker defaults to `./tts_server.py` (override with `TTS_SERVER`). Hearth and ShowBench must be running (Hearth with `HEARTH_ROUNDS_INTERVAL_SEC=0` so only the demo clock triggers the care loop).
