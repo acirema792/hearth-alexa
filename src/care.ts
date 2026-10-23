@@ -40,7 +40,7 @@ export const SAFETY_LINE =
 
 export class CareEngine {
   constructor(
-    private readonly store: Store,
+    readonly store: Store,
     readonly clock: Clock,
     private readonly notifier: Notifier,
     private readonly pharmacy: Pharmacy,
@@ -271,6 +271,41 @@ export class CareEngine {
     };
   }
 
+  /** Recent announcements for the care recipient's devices (newest last). */
+  announcements(now = this.clock.now()) {
+    const since = now.getTime() - 3 * 3600_000;
+    return this.state.notifications
+      .filter((n) => n.to === this.recipient.id && new Date(n.at).getTime() >= since)
+      .slice(-5)
+      .map((n) => ({ id: n.id, title: n.title, speech: n.body, at: n.at, kind: n.reason.split(":")[0] }));
+  }
+
+  /**
+   * Read-only answer to "did I take my …?". Never logs anything, so an uncertain question
+   * can't accidentally become a recorded dose.
+   */
+  checkMedication(query: string) {
+    const now = this.clock.now();
+    const date = this.today(now);
+    const med = this.resolveMed(query);
+    const doses = this.dosesFor(date, now).filter((d) => !med || d.medId === med.id);
+    if (med === undefined && !/pill|med|medicine|dose/i.test(query)) {
+      return { ok: false as const, error: `I couldn't find "${query}". Rosa's list: ${this.state.medications.map((m) => m.name).join(", ")}.` };
+    }
+    const lines = doses.map((d) =>
+      d.status === "taken" ? `${d.name} (${d.timeLabel}) was logged at ${d.loggedAtLabel}` : d.status === "upcoming" ? `${d.name} isn't due until ${d.timeLabel}` : `${d.name} (${d.timeLabel}) hasn't been logged yet`,
+    );
+    const anyTaken = doses.some((d) => d.status === "taken");
+    const anyOpen = doses.some((d) => ["due", "late", "missed"].includes(d.status));
+    return {
+      ok: true as const,
+      doses,
+      answer: `${lines.join(". ")}.`,
+      advice: anyTaken && !anyOpen ? "Please don't take another one." : anyOpen ? "If you're not sure whether you took it, it's safest not to guess: I can call the pharmacy for you." : "",
+      careTeam: this.state.household.careTeam,
+    };
+  }
+
   medName(id: string): string {
     return this.state.medications.find((m) => m.id === id)?.name ?? id;
   }
@@ -321,6 +356,8 @@ export class CareEngine {
     });
     if (to.id !== this.recipient.id) {
       await this.notify(to.id, { severity: "info", title: `💬 ${from.name}`, body: msg.text, reason: `message:${msg.id}` });
+    } else {
+      await this.notify(to.id, { severity: "info", title: `Message from ${from.name}`, body: `${to.name}, ${from.name} sent you a message: ${msg.text}`, reason: `message:${msg.id}` });
     }
     return { ok: true as const, message: { ...msg, from: from.name, to: to.name } };
   }
@@ -351,6 +388,8 @@ export class CareEngine {
       s.notifications.push(note);
       s.activity.push({ at: note.at, actor: "hearth", text: `Notified ${this.person(personId).name}: ${n.title}` });
     });
+    // Announcements to the care recipient are pushed to her devices (MCP resource subscription).
+    if (personId === this.recipient.id) this.store.emit("announcement", note);
     return note;
   }
 

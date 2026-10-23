@@ -95,9 +95,10 @@ function render(data: Payload) {
   if (!board) return;
   last = data;
   const open = board.doses.filter((d: Payload) => ["due", "late", "missed"].includes(d.status));
-  const rest = board.doses.filter((d: Payload) => !["due", "late", "missed"].includes(d.status));
+  const later = board.doses.filter((d: Payload) => d.status === "upcoming");
+  const taken = board.doses.filter((d: Payload) => d.status === "taken" || d.status === "skipped");
   const allDone = board.takenCount === board.totalCount;
-
+  const rest = later.slice(open.length ? 0 : 1);
   const notice = data.notice || data.error;
   const msg = board.messages[0];
   const refill = board.refills.find((r: Payload) => !r.ordered);
@@ -120,22 +121,21 @@ function render(data: Payload) {
         h(
           "div",
           { class: "col now" },
-          h("h2", {}, allDone ? "All done for today" : open.length ? "Take now" : "Coming up"),
+          h("h2", {}, allDone ? "All done for today" : open.length ? "Take now" : "Next up"),
           allDone
             ? h("p", { class: "done" }, board.streakDays >= 2 ? `${board.streakDays} days in a row. Your family can see it.` : "Every dose is logged.")
-            : open.length
-              ? h("ul", { class: "doses" }, ...open.map((d: Payload) => doseRow(d, true)))
-              : h("ul", { class: "doses" }, ...rest.filter((d: Payload) => d.status === "upcoming").slice(0, 1).map((d: Payload) => doseRow(d, false))),
+            : h("ul", { class: "doses" }, ...(open.length ? open.map((d: Payload) => doseRow(d, true)) : later.slice(0, 1).map((d: Payload) => doseRow(d, false)))),
         ),
         h(
           "div",
           { class: "col later" },
           h("h2", {}, "Rest of today"),
-          h("ul", { class: "doses small" }, ...rest.map((d: Payload) => doseRow(d, false))),
+          rest.length ? h("ul", { class: "doses small" }, ...rest.map((d: Payload) => doseRow(d, false))) : h("p", { class: "quiet" }, "Nothing else scheduled."),
+          taken.length ? h("p", { class: "taken-line" }, `Taken: ${taken.map((d: Payload) => `${d.name} ${d.loggedAtLabel ?? ""}`.trim()).join(", ")}`) : null,
           h(
             "div",
             { class: `checkin ${board.checkIn ? "yes" : "no"}` },
-            board.checkIn ? `Check-in done: feeling ${board.checkIn.mood}` : `No check-in yet. Say "let's do my check-in".`,
+            board.checkIn ? `Check-in done: feeling ${board.checkIn.mood}` : `No check-in yet today.`,
           ),
         ),
       ),
@@ -159,5 +159,5 @@ connectView("today", render).then((a) => {
       const r = await app.callServerTool({ name: "refresh_today", arguments: {} });
       render(r.structuredContent as Payload);
     } catch {}
-  }, 15000);
+  }, 5000);
 });

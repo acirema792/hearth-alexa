@@ -13,6 +13,7 @@ export class Store extends EventEmitter {
 
   constructor(private readonly path: string | null, seedNow: () => Date) {
     super();
+    this.setMaxListeners(500); // one listener per live MCP session
     if (path && existsSync(path)) {
       this.state = JSON.parse(readFileSync(path, "utf8")) as HearthState;
     } else {

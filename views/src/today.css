@@ -60,3 +60,5 @@
 @keyframes warm { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage) 70%, transparent); } 100% { box-shadow: 0 0 0 26px transparent; } }
 
 .checkin { overflow-wrap: anywhere; }
+.taken-line { color: var(--sage); font-size: 0.85em; }
+.quiet { color: var(--ink-dim); }

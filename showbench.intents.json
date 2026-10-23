@@ -4,6 +4,7 @@
     "what's on today?",
     "I took my morning pills",
     "let's do my check-in",
+    "did I take my metformin?",
     "order more metformin",
     "tell Daniel the roses are blooming",
     "how's Mom doing this week?"
@@ -35,7 +36,14 @@
       ]
     },
     {
-      "match": "(did i take|what'?s next|what'?s on|my day|today)",
+      "match": "(?:did i (?:already )?take|have i taken|can'?t remember (?:if|whether) i took) (?:my )?(.+?)\\??$",
+      "tool": "check_medication",
+      "args": {
+        "medication": "{{1}}"
+      }
+    },
+    {
+      "match": "(what'?s next|what'?s on|my day|today)",
       "tool": "show_today"
     },
     {
@@ -84,5 +92,8 @@
       "match": "care rounds|check on everything",
       "tool": "run_care_rounds"
     }
+  ],
+  "announce": [
+    "hearth://announcements"
   ]
 }
