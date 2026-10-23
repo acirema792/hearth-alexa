@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { registerAppResource, registerAppTool, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
 import { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
-import { CareEngine, POLICY, SAFETY_LINE } from "./care.js";
+import { CareEngine, money, POLICY, SAFETY_LINE } from "./care.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const VIEWS_DIR = join(here, "..", "views", "dist");
@@ -120,18 +120,20 @@ export function buildServer(care: CareEngine): McpServer {
   };
 
   // ------------------------------------------------------------------ tools: care recipient
-  server.registerTool(
+  registerAppTool(
+    server,
     "check_medication",
     {
       title: "Check medication",
       description: "Answer 'did I take my …?' without logging anything. Use this (not log_medication) whenever she is unsure. Returns what was logged today and safe wording.",
       inputSchema: z.object({ medication: z.string().describe("Medication name, purpose, or 'pills' for all") }),
       annotations: { readOnlyHint: true, openWorldHint: false },
+      _meta: { ui: { resourceUri: UI.today } },
     },
     async ({ medication }) => {
       const r = care.checkMedication(medication);
       if (!r.ok) return { content: text(r.error), isError: true };
-      return { content: text(`${r.answer} ${r.advice}`.trim()), structuredContent: r };
+      return { content: text(`${r.answer} ${r.advice}`.trim()), structuredContent: { view: "today", board: care.todayBoard(), notice: r.answer } };
     },
   );
 
@@ -147,12 +149,15 @@ export function buildServer(care: CareEngine): McpServer {
     async () => {
       const board = care.todayBoard();
       const open = board.doses.filter((d) => ["due", "late", "missed"].includes(d.status));
+      const names = (ds: typeof open) => [...new Set(ds.map((d) => d.name))].join(" and ");
       const say = [
-        `${board.greeting}. It's ${board.nowLabel}.`,
-        open.length ? `Still to take: ${open.map((d) => `${d.name} (${d.timeLabel}${d.status === "missed" ? ", missed" : d.status === "late" ? ", late" : ""})`).join(", ")}.` : board.takenCount === board.totalCount ? "All doses taken today. Well done!" : `Next: ${board.nextUp?.name} at ${board.nextUp?.timeLabel}.`,
-        board.checkIn ? "" : "No check-in yet today.",
-        board.messages.length ? `${board.messages.length} new message(s) from family.` : "",
-        board.refills.filter((r) => !r.ordered).map((r) => `${r.name} runs out in ${r.daysLeft} days.`).join(" "),
+        `${board.greeting}.`,
+        open.length
+          ? `Time for your ${names(open)}${open.some((d) => d.status === "missed") ? ", which you missed earlier" : ""}.`
+          : board.takenCount === board.totalCount
+            ? "All your pills are done for today. Well done!"
+            : `You're all caught up. Next is ${board.nextUp?.name} at ${board.nextUp?.timeLabel}.`,
+        board.messages.length ? `You have a message from ${board.messages[0].from}.` : "",
       ].filter(Boolean).join(" ");
       return { content: text(say), structuredContent: { view: "today", board } };
     },
@@ -201,7 +206,7 @@ export function buildServer(care: CareEngine): McpServer {
     async () => {
       const existing = care.todayBoard().checkIn;
       return {
-        content: text(existing ? `You already checked in today (mood ${existing.mood}). Want to update it? How are you feeling?` : `Let's do your check-in, ${care.recipient.name}. First: how are you feeling today? Great, okay, or low?`),
+        content: text(existing ? `You already checked in today (mood ${existing.mood}). Want to update it? How are you feeling?` : `Let's do your check-in, ${care.recipient.name}. How are you feeling today?`),
         structuredContent: { view: "checkin", person: care.recipient.name, existing },
       };
     },
@@ -299,7 +304,7 @@ export function buildServer(care: CareEngine): McpServer {
       const r = await care.quoteRefill({ medication });
       if (!r.ok) return { content: text(r.error), isError: true, structuredContent: { view: "refill", error: r.error } };
       return {
-        content: text(`${r.confirmPrompt} Say yes to order. (quote token: ${r.quote.token})`),
+        content: text(`${r.confirmPrompt} (quote token: ${r.quote.token})`),
         structuredContent: { view: "refill", ...r },
       };
     },
@@ -322,7 +327,7 @@ export function buildServer(care: CareEngine): McpServer {
       const r = await care.confirmRefill({ token, confirmedBy });
       if (!r.ok) return { content: text(r.error), isError: true, structuredContent: { view: "refill", error: r.error } };
       return {
-        content: text(`Done. ${r.order.medication} is ordered (${r.order.id}), $${r.order.copay.toFixed(2)}, arriving ${r.order.arrives}.${r.sandbox ? " (sandbox pharmacy)" : ""}`),
+        content: text(`Done. ${r.order.medication} is ordered for ${money(r.order.copay)}, arriving ${r.order.arrives}.${r.order.confirmedBy !== care.primary.id ? ` ${care.primary.name} knows too.` : ""} (Order ${r.order.id}${r.sandbox ? ", sandbox pharmacy" : ""}.)`),
         structuredContent: { view: "refill", confirmed: true, ...r },
       };
     },

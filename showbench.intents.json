@@ -10,7 +10,8 @@
     "how's Mom doing this week?"
   ],
   "speechStrip": [
-    "\\(quote token:[^)]*\\)"
+    "\\(quote token:[^)]*\\)",
+    "\\(Order [^)]*\\)"
   ],
   "fallback": "I can help with your pills, your check-in, refills and messages to family.",
   "intents": [
@@ -95,5 +96,7 @@
   ],
   "announce": [
     "hearth://announcements"
-  ]
+  ],
+  "speechMaxSentences": 2,
+  "home": "show_today"
 }

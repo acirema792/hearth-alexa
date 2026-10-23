@@ -35,6 +35,9 @@ export const POLICY = {
   doubleDoseGuardHours: 4,
 };
 
+/** "$4" or "$6.25": how a person says a price. */
+export const money = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
+
 export const SAFETY_LINE =
   "Hearth can't give medical or dosing advice. For questions about a dose, call the pharmacist or doctor.";
 
@@ -292,16 +295,21 @@ export class CareEngine {
     if (med === undefined && !/pill|med|medicine|dose/i.test(query)) {
       return { ok: false as const, error: `I couldn't find "${query}". Rosa's list: ${this.state.medications.map((m) => m.name).join(", ")}.` };
     }
-    const lines = doses.map((d) =>
-      d.status === "taken" ? `${d.name} (${d.timeLabel}) was logged at ${d.loggedAtLabel}` : d.status === "upcoming" ? `${d.name} isn't due until ${d.timeLabel}` : `${d.name} (${d.timeLabel}) hasn't been logged yet`,
-    );
-    const anyTaken = doses.some((d) => d.status === "taken");
-    const anyOpen = doses.some((d) => ["due", "late", "missed"].includes(d.status));
+    const taken = doses.filter((d) => d.status === "taken");
+    const open = doses.filter((d) => ["due", "late", "missed"].includes(d.status));
+    const next = doses.find((d) => d.status === "upcoming");
+    const what = med ? med.name : "your pills";
+    const answer = [
+      taken.length
+        ? `You logged ${what} at ${taken.map((d) => d.loggedAtLabel).join(" and ")} today${open.length ? "" : ", so please don't take another one now"}.`
+        : `${what} hasn't been logged yet today.`,
+      open.length ? `The ${open.map((d) => d.timeLabel).join(" and ")} dose isn't logged yet. If you're not sure, it's safest not to guess: I can call the pharmacy.` : next ? `Your next one is at ${next.timeLabel}.` : "",
+    ].filter(Boolean).join(" ");
     return {
       ok: true as const,
       doses,
-      answer: `${lines.join(". ")}.`,
-      advice: anyTaken && !anyOpen ? "Please don't take another one." : anyOpen ? "If you're not sure whether you took it, it's safest not to guess: I can call the pharmacy for you." : "",
+      answer,
+      advice: "",
       careTeam: this.state.household.careTeam,
     };
   }
@@ -416,7 +424,7 @@ export class CareEngine {
         const n = await this.notify(this.recipient.id, {
           severity: "info",
           title: `Reminder: ${d.name}`,
-          body: `${this.recipient.name}, it's time for your ${d.purpose} pill (${d.name}, ${d.timeLabel}). Say "Alexa, I took it" when you're done.`,
+          body: `${this.recipient.name}, it's time for your ${d.purpose} pill. Just tell me when you've taken it.`,
           reason: `missed_dose:${d.id}`,
         });
         mark(d.id, "reminder");
@@ -525,7 +533,7 @@ export class CareEngine {
       medication: { id: med.id, name: med.name, strength: med.strength, rxNumber: med.rxNumber, daysLeft: Math.floor(this.daysOfSupply(med)), refillsLeft: med.refillsLeft },
       sandbox: this.pharmacy.sandbox,
       requiresConfirmation: true,
-      confirmPrompt: `Order ${q.quantity} tablets of ${med.name} ${med.strength} from ${this.pharmacy.name} for a $${q.copay.toFixed(2)} copay, ${q.delivery.toLowerCase()}?`,
+      confirmPrompt: `I can order ${q.quantity} ${med.name} tablets for a ${money(q.copay)} copay, ${q.delivery.toLowerCase().replace("free delivery", "delivered")}. Shall I order it?`,
     };
   }
 
@@ -617,14 +625,16 @@ export class CareEngine {
     const w = this.weekly(now);
     const t = this.todayBoard(now);
     const moods = w.days.filter((d) => d.mood).map((d) => `${d.weekday} ${d.mood}`).join(", ");
-    const missed = w.days.flatMap((d) => d.doses.filter((x) => x.status === "missed").map((x) => `${d.weekday} ${x.name} ${x.time}`));
+    const missed = w.days.flatMap((d) => d.doses.filter((x) => x.status === "missed").map((x) => `${x.name} on ${d.weekday} at ${x.time}`));
+    const lowMood = w.days.filter((d) => d.mood === "low").map((d) => d.weekday);
+    const pain = t.checkIn?.pain === "a lot" ? ` She reported a lot of pain this morning${t.checkIn.note ? ` (${t.checkIn.note})` : ""}.` : "";
+    const low = w.medications.filter((m) => m.lowSupply);
     return [
-      `${w.person}: ${w.adherencePct}% of doses taken over the last 7 days; current streak ${w.streakDays} day(s).`,
-      missed.length ? `Missed: ${missed.join("; ")}.` : "No missed doses this week.",
-      `Today so far: ${t.takenCount}/${t.totalCount} doses logged${t.nextUp ? `, next is ${t.nextUp.name} at ${t.nextUp.timeLabel} (${t.nextUp.status})` : ""}.`,
-      t.checkIn ? `Today's check-in: mood ${t.checkIn.mood}, sleep ${t.checkIn.sleep}, pain ${t.checkIn.pain}${t.checkIn.note ? ` ("${t.checkIn.note}")` : ""}.` : "No check-in yet today.",
-      `Mood this week: ${moods}.`,
-      w.medications.filter((m) => m.lowSupply).map((m) => `${m.name} has ${m.daysLeft} days left.`).join(" "),
+      `${w.person} took ${w.adherencePct}% of her doses this week${w.streakDays >= 2 ? `, and she's on a ${w.streakDays}-day streak` : ""}.`,
+      missed.length ? `She missed ${missed.length === 1 ? "one dose" : `${missed.length} doses`}: ${missed.join("; ")}.` : "No missed doses this week.",
+      `Today she's logged ${t.takenCount} of ${t.totalCount}${t.checkIn ? ` and checked in feeling ${t.checkIn.mood}` : ", no check-in yet"}.${pain}`,
+      lowMood.length ? `She felt low on ${lowMood.join(" and ")}.` : "",
+      low.length ? low.map((m) => `${m.name} has ${m.daysLeft} days left.`).join(" ") : "",
     ].filter(Boolean).join(" ");
   }
 }
