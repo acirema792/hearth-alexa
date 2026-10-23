@@ -1,4 +1,4 @@
-import { connectView, h, mount, svg, relTime, STATUS_WORDS, type Payload } from "./shared";
+import { torndown, connectView, h, mount, svg, relTime, STATUS_WORDS, type Payload } from "./shared";
 
 let app: Awaited<ReturnType<typeof connectView>>;
 let last: Payload | null = null;
@@ -154,7 +154,7 @@ connectView("today", render).then((a) => {
   app = a;
   // Stay live: family can send a note or a dose can be logged from another device.
   setInterval(async () => {
-    if (busy || document.hidden) return;
+    if (busy || document.hidden || torndown) return;
     try {
       const r = await app.callServerTool({ name: "refresh_today", arguments: {} });
       render(r.structuredContent as Payload);

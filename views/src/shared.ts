@@ -2,6 +2,9 @@ import { App } from "@modelcontextprotocol/ext-apps";
 
 export type Payload = Record<string, any>;
 
+/** True once the host has torn this view down; background refreshes stop. */
+export let torndown = false;
+
 /**
  * Connect a Hearth view to its MCP Apps host. Renders on the initial tool result,
  * re-renders when the host pushes a new result, and adapts to host theme.
@@ -13,6 +16,10 @@ export async function connectView(name: string, render: (data: Payload, app: App
     if (data && Object.keys(data).length) render(data, app);
   };
   app.onhostcontextchanged = (ctx) => applyHostContext(ctx as Payload);
+  app.onteardown = async () => {
+    torndown = true;
+    return {};
+  };
   await app.connect();
   applyHostContext((app.getHostContext() ?? {}) as Payload);
   return app;

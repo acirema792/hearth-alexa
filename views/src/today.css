@@ -58,3 +58,5 @@
 
 .celebrate .col.now { animation: warm 1.6s ease-out 1; }
 @keyframes warm { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage) 70%, transparent); } 100% { box-shadow: 0 0 0 26px transparent; } }
+
+.checkin { overflow-wrap: anywhere; }

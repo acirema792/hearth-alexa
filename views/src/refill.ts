@@ -30,7 +30,8 @@ function render(data: Payload) {
   }
   current = data;
   const q = data.quote, m = data.medication;
-  const expires = new Date(q.expiresAt).getTime();
+  // Count down the quote's TTL from now (server time may be a demo clock).
+  const expires = Date.now() + (new Date(q.expiresAt).getTime() - new Date(q.createdAt).getTime());
   const left = h("span", { class: "left" });
   const tick = () => {
     const s = Math.max(0, Math.round((expires - Date.now()) / 1000));
