@@ -103,8 +103,9 @@ export class SandboxPharmacy implements Pharmacy {
     };
   }
 
+  private seq = 100231;
   async place(_med: Medication, _quantity: number, now: Date) {
     const eta = new Date(now.getTime() + (zonedParts(now, "America/Phoenix").hour < 14 ? 1 : 2) * 86400_000);
-    return { orderId: `DBP-${Math.floor(100000 + Math.random() * 899999)}`, deliveryEta: eta.toISOString() };
+    return { orderId: `DBP-${this.seq++}`, deliveryEta: eta.toISOString() };
   }
 }

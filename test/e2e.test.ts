@@ -113,7 +113,7 @@ test("state persists across sessions (a second device sees the same record)", as
   assert.ok(dash.structuredContent.orders.length >= 1);
   assert.ok(dash.structuredContent.alerts.length >= 2);
   const summary = (await other.callTool({ name: "get_care_summary", arguments: {} })) as any;
-  assert.match(summary.content[0].text, /% of doses taken/);
+  assert.match(summary.content[0].text, /took \d+% of her doses/);
   await other.close();
 });
 
