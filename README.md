@@ -16,6 +16,7 @@ npm start           # MCP server → http://127.0.0.1:8787/mcp
 # in a second terminal, from the same folder:
 npx github:acirema792/showbench --server http://localhost:8787/mcp --intents showbench.intents.json \
   --skill skills/hearth-care-circle/SKILL.md --companion http://localhost:8787/companion
+curl -X POST localhost:8787/demo/reset -H 'content-type: application/json' -d '{"set":"08:20"}'   # start the story at 8:20 AM
 # open http://localhost:5173 and click the suggestion chips, then:
 curl -X POST localhost:8787/demo/clock -H 'content-type: application/json' -d '{"set":"19:35"}'   # the Echo speaks up on its own
 ```
