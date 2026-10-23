@@ -7,7 +7,7 @@ Aging parents manage meds & check-ins by voice on Echo Show; their family gets s
 
 **Track:** Alexa+ · **Mini challenge:** Open Source
 
-**Video:** VIDEO_URL
+**Video:** https://youtu.be/INpCtqBra5s
 
 **Code:** https://github.com/acirema792/hearth-alexa (MIT) · Open-source contribution: https://github.com/acirema792/showbench (MIT)
 
