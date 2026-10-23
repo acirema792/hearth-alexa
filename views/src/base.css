@@ -1,0 +1,41 @@
+/* Hearth design tokens: "Sonoran dusk". Display-first (Echo Show), legible at 2 metres. */
+:root {
+  --night: #17203a;
+  --night-2: #1f2a4a;
+  --night-3: #2a375c;
+  --sand: #f3e9dc;
+  --sand-dim: #c9bfb3;
+  --sage: #8fc1a0;
+  --marigold: #f2c14e;
+  --rose: #e46a86;
+  --line: rgba(243, 233, 220, 0.16);
+  --bg: var(--night);
+  --panel: var(--night-2);
+  --ink: var(--sand);
+  --ink-dim: var(--sand-dim);
+  --radius-l: 28px;
+  --radius-s: 14px;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f6efe5;
+  --panel: #fffaf3;
+  --night-3: #e8dccb;
+  --ink: #1d2540;
+  --ink-dim: #5a6178;
+  --line: rgba(29, 37, 64, 0.14);
+  --sage: #3f8a5c;
+  --marigold: #b9850c;
+  --rose: #c23f61;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+body { font-size: clamp(17px, 2.1vw, 24px); line-height: 1.35; }
+h1, h2, p { margin: 0; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible { outline: 4px solid var(--marigold); outline-offset: 3px; }
+ul { list-style: none; margin: 0; padding: 0; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
