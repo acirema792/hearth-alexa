@@ -22,6 +22,8 @@ In 2025 Amazon retired **Alexa Together**, its remote-caregiving subscription. T
 - **63 million Americans** are family caregivers (AARP & NAC, 2025), many of them caring from another city.
 - **Half of US prescriptions aren't taken as prescribed**, at an estimated **$100–300 billion a year** (Bosworth et al., *American Heart Journal*, 2011).
 
+And someone already pays for adherence: Medicare Part D Star Ratings score plans on adherence to exactly Rosa's three drug classes (diabetes medications, RAS antagonists, statins), each triple-weighted. So Hearth can be **free for families and sponsored by Medicare Advantage plans and pharmacies**, which could also ship it as their own branded Alexa+ experience.
+
 The Echo Show already sits in the kitchens of the people who need help most. Alexa+ can now hold a real conversation and render rich cards. We wanted to give it a care brain that a son in Seattle can trust for his mom in Tucson.
 
 ### What it does
