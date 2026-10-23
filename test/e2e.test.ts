@@ -116,3 +116,29 @@ test("state persists across sessions (a second device sees the same record)", as
   assert.match(summary.content[0].text, /% of doses taken/);
   await other.close();
 });
+
+test("proactive: subscribed devices get resources/updated and can read the announcement", async () => {
+  const echo = new Client({ name: "rosas-echo", version: "1.0.0" });
+  await echo.connect(new StreamableHTTPClientTransport(new URL(`${BASE}/mcp`)));
+  const got: string[] = [];
+  echo.setNotificationHandler("notifications/resources/updated" as any, async (n: any) => {
+    got.push(n.params.uri);
+  });
+  await echo.subscribeResource({ uri: "hearth://announcements" });
+  await new Promise((r) => setTimeout(r, 300)); // let the standalone SSE stream open
+  await post("/api/message", { from: "daniel", to: "rosa", text: "Love you Mom" });
+  for (let i = 0; i < 20 && !got.length; i++) await new Promise((r) => setTimeout(r, 100));
+  assert.deepEqual(got.slice(0, 1), ["hearth://announcements"]);
+  const res = await echo.readResource({ uri: "hearth://announcements" });
+  const list = JSON.parse((res.contents[0] as any).text).announcements;
+  assert.match(list.at(-1).speech, /Daniel sent you a message: Love you Mom/);
+  await echo.close();
+});
+
+test("check_medication never logs a dose", async () => {
+  const before = await call("show_today");
+  const r = await call("check_medication", { medication: "atorvastatin" });
+  assert.match(r.content[0].text, /hasn't been logged|isn't due/);
+  const after = await call("show_today");
+  assert.equal(after.structuredContent.board.takenCount, before.structuredContent.board.takenCount);
+});

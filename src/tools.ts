@@ -9,6 +9,8 @@ import { CareEngine, POLICY, SAFETY_LINE } from "./care.js";
 const here = dirname(fileURLToPath(import.meta.url));
 const VIEWS_DIR = join(here, "..", "views", "dist");
 
+export const ANNOUNCEMENTS_URI = "hearth://announcements";
+
 export const UI = {
   today: "ui://hearth/today.html",
   checkin: "ui://hearth/checkin.html",
@@ -28,6 +30,7 @@ Safety rules (non-negotiable):
 
 Typical flows:
 - "I took my pills" → log_medication (medication: "morning pills" or the specific name).
+- "Did I take my …?" / "I can't remember" → check_medication (never log_medication).
 - "How am I doing today?" / "What's next?" → show_today.
 - Morning → start_check_in, then record_check_in with her answers.
 - Family member asks "How's Mom?" → get_care_summary or show_family_dashboard.
@@ -42,7 +45,7 @@ const text = (t: string) => [{ type: "text" as const, text: t }];
 export function buildServer(care: CareEngine): McpServer {
   const server = new McpServer(
     { name: "hearth", title: "Hearth: care circle", version: "1.0.0", websiteUrl: "https://github.com/" },
-    { instructions: SERVER_INSTRUCTIONS, capabilities: { logging: {} } },
+    { instructions: SERVER_INSTRUCTIONS, capabilities: { logging: {}, resources: { subscribe: true, listChanged: true } } },
   );
 
   // ------------------------------------------------------------------ UI resources (MCP Apps)
@@ -87,7 +90,51 @@ export function buildServer(care: CareEngine): McpServer {
     },
   );
 
+  // ------------------------------------------------------------------ proactive announcements (resource subscription)
+  // Devices in Rosa's home subscribe to hearth://announcements. When Hearth's care loop needs
+  // to speak up (a late dose, a note from Daniel), the server sends notifications/resources/updated
+  // and the device reads the resource and announces it, the way Alexa+ delivers proactive notifications.
+  const subscriptions = new Set<string>();
+  server.registerResource(
+    "announcements",
+    ANNOUNCEMENTS_URI,
+    { title: "Announcements for the care recipient", description: "Things Hearth wants her devices to say out loud now (reminders, family messages). Subscribe to get notifications/resources/updated.", mimeType: "application/json" },
+    async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify({ announcements: care.announcements() }) }] }),
+  );
+  server.server.setRequestHandler("resources/subscribe", async (req: any) => {
+    subscriptions.add(req.params.uri);
+    return {};
+  });
+  server.server.setRequestHandler("resources/unsubscribe", async (req: any) => {
+    subscriptions.delete(req.params.uri);
+    return {};
+  });
+  const onAnnouncement = () => {
+    if (subscriptions.has(ANNOUNCEMENTS_URI)) server.server.sendResourceUpdated({ uri: ANNOUNCEMENTS_URI }).catch(() => {});
+  };
+  care.store.on("announcement", onAnnouncement);
+  const prevClose = server.server.onclose;
+  server.server.onclose = () => {
+    care.store.off("announcement", onAnnouncement);
+    prevClose?.();
+  };
+
   // ------------------------------------------------------------------ tools: care recipient
+  server.registerTool(
+    "check_medication",
+    {
+      title: "Check medication",
+      description: "Answer 'did I take my …?' without logging anything. Use this (not log_medication) whenever she is unsure. Returns what was logged today and safe wording.",
+      inputSchema: z.object({ medication: z.string().describe("Medication name, purpose, or 'pills' for all") }),
+      annotations: { readOnlyHint: true, openWorldHint: false },
+    },
+    async ({ medication }) => {
+      const r = care.checkMedication(medication);
+      if (!r.ok) return { content: text(r.error), isError: true };
+      return { content: text(`${r.answer} ${r.advice}`.trim()), structuredContent: r };
+    },
+  );
+
   registerAppTool(
     server,
     "show_today",

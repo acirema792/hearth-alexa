@@ -115,5 +115,5 @@ function render(data: Payload) {
 document.documentElement.dataset.theme = "light";
 connectView("family", render).then((a) => {
   app = a;
-  setInterval(() => !document.hidden && !torndown && document.activeElement?.tagName !== "INPUT" && refresh().catch(() => {}), 15000);
+  setInterval(() => !document.hidden && !torndown && document.activeElement?.tagName !== "INPUT" && refresh().catch(() => {}), 5000);
 });
